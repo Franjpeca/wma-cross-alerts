@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 
@@ -20,7 +21,15 @@ def get_logger(name: str) -> logging.Logger:
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
 
-    file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
+    file_handler = TimedRotatingFileHandler(
+        LOG_FILE,
+        when="W0",
+        interval=1,
+        backupCount=12,
+        encoding="utf-8",
+        utc=True,
+    )
+
     file_handler.setFormatter(formatter)
 
     stream_handler = logging.StreamHandler()

@@ -1,2 +1,10 @@
-PyYAML
-lxml
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.8
+yfinance>=0.2
+PyYAML>=6.0
+requests>=2.31
+python-dateutil>=2.8
+pytz>=2023.3
+python-dotenv>=1.0
+lxml>=6.0.2
