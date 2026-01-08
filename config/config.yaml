@@ -1,0 +1,29 @@
+markets:
+  - name: sp500
+    mode: all
+    symbols:
+      - MSFT
+      - AAPL
+      - GOOGL
+
+  - name: nasdaq100
+    mode: all
+    symbols:
+      - QQQ
+
+blacklist:
+  symbols:
+    - Q
+    - TEST
+
+signals:
+  golden_cross_wma:
+    short_period: 30
+    long_period: 200
+
+chart:
+  window_sessions: 300
+
+notifications:
+  email:
+    enabled: true

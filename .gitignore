@@ -1,0 +1,51 @@
+# Entornos
+venv/
+.venv/
+env/
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Logs
+logs/
+*.log
+
+# Datos y outputs
+data/
+*.csv
+*.json
+*.parquet
+*.pkl
+*.joblib
+
+# Graficos e imagenes
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
