@@ -1,0 +1,11 @@
+{
+  "symbol": "CME",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-20",
+  "wma_short": 272.15828227381553,
+  "wma_long": 271.8905365263526,
+  "difference": 0.267745747462925,
+  "period_short": 30,
+  "period_long": 200
+}

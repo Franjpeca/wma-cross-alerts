@@ -1,0 +1,11 @@
+{
+  "symbol": "ITW",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-14",
+  "wma_short": 252.58600063529065,
+  "wma_long": 252.5743870552025,
+  "difference": 0.011613580088152275,
+  "period_short": 30,
+  "period_long": 200
+}

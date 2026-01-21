@@ -1,0 +1,11 @@
+{
+  "symbol": "O",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-16",
+  "wma_short": 58.118042607461255,
+  "wma_long": 57.99835715203736,
+  "difference": 0.11968545542389819,
+  "period_short": 30,
+  "period_long": 200
+}

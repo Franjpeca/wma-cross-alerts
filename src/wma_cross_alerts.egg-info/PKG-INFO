@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: wma-cross-alerts
+Version: 0.1.0
+Summary: Sistema de alertas basado en Golden Cross WMA
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pandas>=2.0
+Requires-Dist: numpy>=1.24
+Requires-Dist: matplotlib>=3.8
+Requires-Dist: yfinance>=0.2
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: requests>=2.31
+Requires-Dist: python-dateutil>=2.8
+Requires-Dist: pytz>=2023.3
+Requires-Dist: python-dotenv>=1.0
+
+# Sistema de alertas de Golden Cross WMA
+
+Este programa envía alertas a través de email cuando se detecta un Golden Cross en mercados de bolsa, a través de datos dados por la API de Yahoo Finance.

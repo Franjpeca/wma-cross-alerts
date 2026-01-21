@@ -1,0 +1,11 @@
+{
+  "symbol": "URI",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-14",
+  "wma_short": 862.3374590473791,
+  "wma_long": 860.7845983917084,
+  "difference": 1.5528606556706563,
+  "period_short": 30,
+  "period_long": 200
+}

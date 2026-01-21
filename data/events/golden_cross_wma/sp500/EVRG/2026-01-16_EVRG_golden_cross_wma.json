@@ -1,0 +1,11 @@
+{
+  "symbol": "EVRG",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-16",
+  "wma_short": 73.56008632208712,
+  "wma_long": 73.44167561317558,
+  "difference": 0.11841070891154004,
+  "period_short": 30,
+  "period_long": 200
+}

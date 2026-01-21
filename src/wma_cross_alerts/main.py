@@ -26,7 +26,6 @@ from wma_cross_alerts.notifiers.email import (
 
 logger = get_logger("main")
 
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="WMA Golden Cross Alert System")
     parser.add_argument(

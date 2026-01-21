@@ -1,0 +1,11 @@
+{
+  "symbol": "ECL",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-15",
+  "wma_short": 267.6455057451802,
+  "wma_long": 267.58910178492914,
+  "difference": 0.056403960251032004,
+  "period_short": 30,
+  "period_long": 200
+}

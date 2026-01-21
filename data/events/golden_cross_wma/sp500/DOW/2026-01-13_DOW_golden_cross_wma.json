@@ -1,0 +1,11 @@
+{
+  "symbol": "DOW",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-13",
+  "wma_short": 24.400989228935654,
+  "wma_long": 24.30759208328095,
+  "difference": 0.09339714565470203,
+  "period_short": 30,
+  "period_long": 200
+}

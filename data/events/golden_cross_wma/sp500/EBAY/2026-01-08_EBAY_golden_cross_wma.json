@@ -1,0 +1,11 @@
+{
+  "symbol": "EBAY",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-08",
+  "wma_short": 86.16651593280095,
+  "wma_long": 85.93574626960564,
+  "difference": 0.23076966319530356,
+  "period_short": 30,
+  "period_long": 200
+}

@@ -1,0 +1,11 @@
+{
+  "symbol": "PPG",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-15",
+  "wma_short": 105.12662414222635,
+  "wma_long": 105.07710524032365,
+  "difference": 0.04951890190270092,
+  "period_short": 30,
+  "period_long": 200
+}

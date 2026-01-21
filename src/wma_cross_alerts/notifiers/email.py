@@ -67,8 +67,8 @@ def send_cross_alert_email(
             <h3>{i}. {gc['symbol']} <span style="color:#666;">({gc['market']})</span></h3>
             <ul>
                 <li><b>Fecha:</b> {gc['date']}</li>
-                <li><b>WMA corta:</b> {gc['wma_short']:.4f}</li>
-                <li><b>WMA larga:</b> {gc['wma_long']:.4f}</li>
+                <li><b>WMA corta (30):</b> {gc['wma_short']:.4f}</li>
+                <li><b>WMA larga (200):</b> {gc['wma_long']:.4f}</li>
                 <li><b>Diferencia:</b> <b>{gc['difference']:.4f}</b></li>
             </ul>
         </div>

@@ -1,0 +1,11 @@
+{
+  "symbol": "ES",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-16",
+  "wma_short": 67.9166246639785,
+  "wma_long": 67.83115244699354,
+  "difference": 0.08547221698495377,
+  "period_short": 30,
+  "period_long": 200
+}

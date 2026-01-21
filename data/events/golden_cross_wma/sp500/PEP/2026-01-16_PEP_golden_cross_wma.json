@@ -1,0 +1,11 @@
+{
+  "symbol": "PEP",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-16",
+  "wma_short": 143.86509740685904,
+  "wma_long": 143.83963411473516,
+  "difference": 0.02546329212387377,
+  "period_short": 30,
+  "period_long": 200
+}

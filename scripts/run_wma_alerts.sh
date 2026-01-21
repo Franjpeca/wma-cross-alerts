@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-PROJECT_DIR="../"
+PROJECT_DIR="/opt/wma-cross-alerts"
 VENV_DIR="$PROJECT_DIR/venv"
 ENV_FILE="$PROJECT_DIR/.env"
 LOG_FILE="$PROJECT_DIR/logs/app.log"
@@ -12,9 +12,11 @@ cd "$PROJECT_DIR"
 # Cargar variables de entorno
 # -------------------------
 if [ -f "$ENV_FILE" ]; then
-  export $(grep -v '^#' "$ENV_FILE" | xargs)
+  set -a
+  source "$ENV_FILE"
+  set +a
 else
-  echo "ERROR: .env no encontrado"
+  echo "ERROR: .env no encontrado" >> "$LOG_FILE"
   exit 1
 fi
 
@@ -23,10 +25,12 @@ fi
 # -------------------------
 source "$VENV_DIR/bin/activate"
 
+echo "Ejecutando aplicacion"
+
 # -------------------------
 # Ejecutar aplicacion
 # -------------------------
-if ! python src/wma_cross_alerts/main.py >> "$LOG_FILE" 2>&1; then
+if ! python -m wma_cross_alerts.main >> "$LOG_FILE" 2>&1; then
   echo "ERROR: fallo en la ejecucion del sistema" >> "$LOG_FILE"
 
   python - <<EOF
@@ -37,11 +41,10 @@ from email.message import EmailMessage
 msg = EmailMessage()
 msg["Subject"] = "ERROR en ejecucion WMA Golden Cross"
 msg["From"] = os.environ["EMAIL_FROM"]
-msg["To"] = os.environ["EMAIL_TO"]
+msg["To"] = os.environ["EMAIL_TO_ERRORS"]
 msg.set_content(
     "La ejecucion diaria ha fallado.\n\n"
-    "Revisa el log:\n"
-    f"{os.environ.get('HOSTNAME', 'host')}\n\n"
+    f"Host: {os.environ.get('HOSTNAME', 'desconocido')}\n\n"
     "Ultimas lineas del log:\n\n"
 )
 

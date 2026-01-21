@@ -1,0 +1,11 @@
+{
+  "symbol": "SNPS",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-13",
+  "wma_short": 488.7823003953503,
+  "wma_long": 488.6410195740657,
+  "difference": 0.14128082128462438,
+  "period_short": 30,
+  "period_long": 200
+}

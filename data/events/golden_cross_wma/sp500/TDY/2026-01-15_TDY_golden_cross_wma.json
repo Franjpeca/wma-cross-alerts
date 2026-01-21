@@ -1,0 +1,11 @@
+{
+  "symbol": "TDY",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-15",
+  "wma_short": 531.7493323541456,
+  "wma_long": 530.5754721464091,
+  "difference": 1.1738602077365385,
+  "period_short": 30,
+  "period_long": 200
+}

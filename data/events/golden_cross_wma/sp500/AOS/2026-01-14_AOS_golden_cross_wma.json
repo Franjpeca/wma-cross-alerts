@@ -1,0 +1,11 @@
+{
+  "symbol": "AOS",
+  "market": "sp500",
+  "signal": "golden_cross_wma",
+  "date": "2026-01-14",
+  "wma_short": 68.78415097472488,
+  "wma_long": 68.72329709010337,
+  "difference": 0.060853884621508314,
+  "period_short": 30,
+  "period_long": 200
+}
