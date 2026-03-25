@@ -46,3 +46,4 @@ data/
 .local/
 .bash_history
 .selected_editor
+.gitconfig
