@@ -9,6 +9,11 @@ SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
+from dotenv import load_dotenv
+
+# Cargar variables de entorno del archivo .env
+load_dotenv()
+
 from wma_cross_alerts.utils.logger import get_logger
 from wma_cross_alerts.core.settings import load_config
 from wma_cross_alerts.core.universe import get_universe
@@ -22,6 +27,7 @@ from wma_cross_alerts.reporting.plotter import plot_golden_cross
 from wma_cross_alerts.notifiers.email import (
     send_cross_alert_email,
     send_error_report_email,
+    send_success_execution_email,
 )
 
 logger = get_logger("main")
@@ -33,6 +39,13 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         help="Fecha de ejecucion YYYY-MM-DD (cierre evaluado)",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["normal", "revalidation"],
+        default="normal",
+        help="Modo de ejecucion: normal o revalidation",
     )
     return parser.parse_args()
 
@@ -85,13 +98,16 @@ def main() -> None:
 
     start_date = "2000-01-01"
 
-    golden_crosses: list[dict] = []
+    new_crosses: list[dict] = []
+    confirmed_crosses: list[dict] = []
     invalid_symbols: list[tuple] = []
     processing_errors: list[tuple] = []
+    market_stats: dict[str, dict[str, int]] = {}
 
     for market in config["markets"]:
         market_name = market["name"]
         symbols = resolve_symbols(market)
+        market_stats[market_name] = {"scanned": len(symbols), "found": 0}
 
         for symbol in symbols:
             if symbol in blacklist:
@@ -132,6 +148,19 @@ def main() -> None:
 
                 if already_registered(symbol, signal_name, event_date):
                     logger.info(f"Golden Cross ya registrado para {symbol} en {event_date}")
+                    
+                    # En modo revalidación, trackear como "confirmado"
+                    if args.mode == "revalidation":
+                        diff = float(wma_short.iloc[-1] - wma_long.iloc[-1])
+                        confirmed_crosses.append({
+                            "symbol": symbol,
+                            "market": market_name,
+                            "date": event_date,
+                            "difference": diff,
+                            "wma_short": float(wma_short.iloc[-1]),
+                            "wma_long": float(wma_long.iloc[-1]),
+                        })
+                    
                     continue
 
                 diff = float(wma_short.iloc[-1] - wma_long.iloc[-1])
@@ -166,7 +195,7 @@ def main() -> None:
                     window_sessions=config["chart"]["window_sessions"],
                 )
 
-                golden_crosses.append({
+                new_crosses.append({
                     "symbol": symbol,
                     "market": market_name,
                     "date": event_date,
@@ -175,6 +204,7 @@ def main() -> None:
                     "wma_long": float(wma_long.iloc[-1]),
                     "chart_path": chart_path,
                 })
+                market_stats[market_name]["found"] += 1
 
             except Exception as e:
                 logger.error(f"Error procesando {symbol}: {str(e)}", exc_info=True)
@@ -184,12 +214,20 @@ def main() -> None:
     logger.info("FIN DE EJECUCION DEL SISTEMA")
     logger.info("=" * 70)
 
-    if golden_crosses:
+    logger.info("RESUMEN POR MERCADO:")
+    logger.info(f"{'MERCADO':<15} | {'CONSULTADAS':<12} | {'GOLDEN CROSS':<12}")
+    logger.info("-" * 50)
+    for m_name, stats in market_stats.items():
+        logger.info(f"{m_name:<15} | {stats['scanned']:<12} | {stats['found']:<12}")
+    logger.info("-" * 50)
+
+    if new_crosses:
         send_cross_alert_email(
             exec_date=exec_date,
-            golden_crosses=golden_crosses,
+            golden_crosses=new_crosses,
             invalid_symbols=invalid_symbols,
             processing_errors=processing_errors,
+            mode=args.mode,
         )
     else:
         logger.info("No se detectaron Golden Cross en esta ejecucion")
@@ -199,7 +237,17 @@ def main() -> None:
             exec_date=exec_date,
             processing_errors=processing_errors,
             invalid_symbols=invalid_symbols,
+            mode=args.mode,
         )
+
+    # 4. Enviar confirmacion de ejecucion exitosa (si no hubo excepciones fatales)
+    send_success_execution_email(
+        exec_date=exec_date,
+        market_stats=market_stats,
+        golden_crosses_count=len(new_crosses),
+        mode=args.mode,
+        confirmed_crosses_count=len(confirmed_crosses),
+    )
 
 
 if __name__ == "__main__":

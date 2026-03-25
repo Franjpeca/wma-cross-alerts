@@ -1,25 +1,20 @@
 from __future__ import annotations
-
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import json
 import os
 import re
 from typing import Any
-
 import requests
-
 from wma_cross_alerts.utils.logger import get_logger
 
 logger = get_logger("universe")
 
 try:
     from dotenv import load_dotenv
-
     load_dotenv()
 except Exception:
     pass
-
 
 CACHE_DIR = Path("data") / "universes"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -32,11 +27,13 @@ YFIUA_BASE = "https://yfiua.github.io/index-constituents"
 YFIUA_URLS = {
     "sp500": f"{YFIUA_BASE}/constituents-sp500.json",
     "nasdaq100": f"{YFIUA_BASE}/constituents-nasdaq100.json",
+    "dowjones": f"{YFIUA_BASE}/constituents-dowjones.json",  # [NUEVO]
 }
 
 EXPECTED_COUNTS = {
     "sp500": (450, 520),
     "nasdaq100": (90, 110),
+    "dowjones": (28, 35), # [NUEVO]
 }
 
 _SYMBOL_RE = re.compile(r"^[A-Z0-9][A-Z0-9-]{0,15}$")
@@ -51,7 +48,13 @@ def get_universe(market: str, *, force_refresh: bool = False) -> list[str]:
         return list(cached["symbols"])
 
     try:
-        symbols, source = _fetch_universe(market)
+        # Intenta primero fuentes online conocidas
+        if market in YFIUA_URLS:
+            symbols, source = _fetch_universe(market)
+        else:
+            # Fallback: Intenta fichero manual local [NUEVO]
+            symbols, source = _fetch_from_local_file(market)
+
         payload = {
             "market": market,
             "source": source,
@@ -61,6 +64,7 @@ def get_universe(market: str, *, force_refresh: bool = False) -> list[str]:
         }
         _write_cache(cache_path, payload)
         return symbols
+
     except Exception as e:
         if cached is not None:
             logger.warning(
@@ -70,35 +74,70 @@ def get_universe(market: str, *, force_refresh: bool = False) -> list[str]:
         raise
 
 
+def _fetch_from_local_file(market: str) -> tuple[list[str], str]: # [NUEVO]
+    # Busca en data/universes/manual/{market}.txt o .csv
+    manual_dir = CACHE_DIR.parent / "universes" / "manual"
+    manual_dir.mkdir(parents=True, exist_ok=True)
+    
+    file_txt = manual_dir / f"{market}.txt"
+    file_csv = manual_dir / f"{market}.csv"
+    
+    path = None
+    if file_txt.exists():
+        path = file_txt
+    elif file_csv.exists():
+        path = file_csv
+        
+    if not path:
+        raise FileNotFoundError(
+            f"No se encontró lista manual para '{market}' en {manual_dir} "
+            "(se esperaba .txt o .csv con un símbolo por línea)"
+        )
+        
+    symbols = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            sym = _normalize_symbol(line)
+            if sym:
+                symbols.append(sym)
+                
+    symbols = _normalize_symbols(symbols)
+    _validate_symbols(market, symbols)
+    return symbols, f"local/{path.name}"
+
+
 def _fetch_universe(market: str) -> tuple[list[str], str]:
     if market not in YFIUA_URLS:
         raise ValueError(f"Mercado no soportado en universe.py: {market}")
-
+    
     symbols = _fetch_from_yfiua_json(market)
     symbols = _normalize_symbols(symbols)
-
     _validate_symbols(market, symbols)
+    
     return symbols, "yfiua/index-constituents"
 
 
 def _fetch_from_yfiua_json(market: str) -> list[str]:
     url = YFIUA_URLS[market]
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
+    
     resp = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT_SECS)
     resp.raise_for_status()
-
+    
     data: Any = resp.json()
     if not isinstance(data, list):
         raise ValueError(f"Formato inesperado en JSON de universo ({market})")
-
+        
     out: list[str] = []
     for row in data:
         if isinstance(row, dict):
             sym = row.get("Symbol") or row.get("symbol") or row.get("ticker") or row.get("Ticker")
             if sym:
                 out.append(str(sym))
+                
     if not out:
         raise ValueError(f"No se extrajeron simbolos del JSON ({market})")
+        
     return out
 
 
@@ -127,12 +166,13 @@ def _normalize_symbol(s: str) -> str:
 def _validate_symbols(market: str, symbols: list[str]) -> None:
     if not symbols:
         raise ValueError("Universo vacio")
-
+        
     lo, hi = EXPECTED_COUNTS.get(market, (1, 10_000))
     n = len(symbols)
+    
     if not (lo <= n <= hi):
         raise ValueError(f"Recuento inesperado para {market}: {n} (esperado {lo}-{hi})")
-
+        
     bad = [s for s in symbols if _SYMBOL_RE.match(s) is None]
     if bad:
         raise ValueError(f"Simbolos invalidos detectados en {market} (ej: {bad[:10]})")
@@ -148,6 +188,7 @@ def _read_cache(path: Path) -> dict[str, Any] | None:
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
+            
         if isinstance(data, list):
             return {
                 "market": path.stem,
@@ -156,8 +197,10 @@ def _read_cache(path: Path) -> dict[str, Any] | None:
                 "count": len(data),
                 "symbols": data,
             }
+            
         if isinstance(data, dict) and isinstance(data.get("symbols"), list):
             return data
+            
     except Exception:
         return None
     return None
@@ -176,15 +219,16 @@ def _is_fresh(cached: dict[str, Any]) -> bool:
     ttl_days = DEFAULT_TTL_DAYS
     if ttl_days <= 0:
         return False
-
+        
     ts = cached.get("fetched_at_utc")
     if not isinstance(ts, str) or not ts:
         return False
-
+        
     try:
         dt = datetime.fromisoformat(ts)
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
+            
         age = datetime.now(timezone.utc) - dt.astimezone(timezone.utc)
         return age <= timedelta(days=ttl_days)
     except Exception:

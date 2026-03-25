@@ -11,6 +11,11 @@ markets:
     symbols:
       - QQQ
 
+  - name: dowjones
+    mode: all
+  - name: nyse
+    mode: all
+
 blacklist:
   symbols:
     - Q
